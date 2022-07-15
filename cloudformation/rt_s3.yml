@@ -1,0 +1,39 @@
+################## Cloudformation RaiseTech 課題 ###################
+## Author: Daisaku kato
+####################################################################
+AWSTemplateFormatVersion: 2010-09-09
+Description: RaiseTech S3
+
+Parameters:
+  BucketName:
+    Type: String
+    Default: raisetech-sample-upload
+
+Resources:
+#=============================================
+# S3
+#=============================================
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+
+#=============================================
+# Outputs
+#=============================================
+Outputs:
+  S3ARN:
+    Description: S3ARN
+    Value: !GetAtt S3Bucket.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-ARN
+  S3BucketName:
+    Description: S3BucketName
+    Value: !Ref BucketName
+    Export:
+      Name: !Ref BucketName

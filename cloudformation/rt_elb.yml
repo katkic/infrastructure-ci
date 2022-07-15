@@ -1,0 +1,71 @@
+################## Cloudformation RaiseTech 課題 ###################
+## Author: Daisaku kato
+####################################################################
+AWSTemplateFormatVersion: 2010-09-09
+Description: RaiseTech ELB
+
+Parameters:
+  VPCStack:
+    Type: String
+    Default: RaiseTech-cfn
+  EC2Stack:
+    Type: String
+    Default: RaiseTech-cfn-ec2
+
+Resources:
+#=============================================
+# ELB
+#=============================================
+  FrontLB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Ref AWS::StackName
+      Scheme: internet-facing
+      IpAddressType: ipv4
+      Type: application
+      Subnets:
+        - Fn::ImportValue: !Sub ${VPCStack}-PublicSubnet1a
+        - Fn::ImportValue: !Sub ${VPCStack}-PublicSubnet1c
+      SecurityGroups:
+        - Fn::ImportValue: !Sub ${VPCStack}-sg-SecurityGroupELB
+
+#=============================================
+# Listener
+#=============================================
+  FrontLBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref FrontLB
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref FrontLBTargetGroup
+
+#=============================================
+# TargetGroup
+#=============================================
+  FrontLBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub ${AWS::StackName}-tg
+      VpcId:
+        Fn::ImportValue: !Sub ${VPCStack}-VPCID
+      Port: 3000
+      Protocol: HTTP
+      HealthCheckPath: /
+      Targets:
+        - Id:
+            Fn::ImportValue: !Sub ${EC2Stack}-EC2WebServer1a
+        - Id:
+            Fn::ImportValue: !Sub ${EC2Stack}-EC2WebServer1c
+
+#=============================================
+# Outputs
+#=============================================
+Outputs:
+  FrontLBEndpoint:
+    Description: FrontLBEndpoint
+    Value: !GetAtt FrontLB.DNSName
+    Export:
+      Name: !Sub ${AWS::StackName}-Endpoint

@@ -1,0 +1,56 @@
+################## Cloudformation RaiseTech 課題 ###################
+## Author: Daisaku kato
+####################################################################
+AWSTemplateFormatVersion: 2010-09-09
+Description: RaiseTech RDS
+
+Parameters:
+  VPCStack:
+    Type: String
+    Default: RaiseTech-cfn
+  DBUser:
+    Type: String
+    Default: admin
+  DBPassword:
+    Type: String
+    Default: pitagoraswitch
+    NoEcho: true
+
+Resources:
+#=============================================
+# RDS
+#=============================================
+  DBInstance:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Delete
+    Properties:
+      DBInstanceClass: db.t2.micro
+      AllocatedStorage: 10
+      StorageType: gp2
+      Engine: MySQL
+      MasterUsername: !Ref DBUser
+      MasterUserPassword: !Ref DBPassword
+      BackupRetentionPeriod: 0
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      AvailabilityZone: !Sub ${AWS::Region}a
+      MultiAZ: false
+      VPCSecurityGroups:
+        - Fn::ImportValue: !Sub ${VPCStack}-sg-SecurityGroupRDS
+
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: DB Subnet Group for Private Subnet
+      SubnetIds:
+        - Fn::ImportValue: !Sub ${VPCStack}-PrivateSubnet1a
+        - Fn::ImportValue: !Sub ${VPCStack}-PrivateSubnet1c
+
+#=============================================
+# Outputs
+#=============================================
+Outputs:
+  DBEndpoint:
+    Description: DBEndpoint
+    Value: !GetAtt DBInstance.Endpoint.Address
+    Export:
+      Name: !Sub ${AWS::StackName}-DBEndpoint

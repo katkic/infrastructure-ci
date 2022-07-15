@@ -1,0 +1,112 @@
+################## Cloudformation RaiseTech 課題 ###################
+## Author: Daisaku kato
+####################################################################
+AWSTemplateFormatVersion: 2010-09-09
+Description: RaiseTech SecurityGroup
+
+Parameters:
+  VPCStack:
+    Type: String
+    Default: RaiseTech-cfn
+
+Resources:
+#=============================================
+# EC2
+#=============================================
+  EC2SecurityGroupSSH:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: RaiseTech Webserver SSH
+      VpcId:
+        Fn::ImportValue: !Sub ${VPCStack}-VPCID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+          Description: Webserver ssh
+      Tags:
+        - Key: Name
+          Value: RaiseTech-cfn-sg-ec2-ssh
+
+  EC2SecurityGroupFromELB:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Webserver from ELB
+      VpcId:
+        Fn::ImportValue: !Sub ${VPCStack}-VPCID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          SourceSecurityGroupId: !Ref SecurityGroupELB
+          Description: From ELB
+      Tags:
+        - Key: Name
+          Value: RaiseTech-cfn-sg-ec2-from-elb
+
+#=============================================
+# RDS
+#=============================================
+  SecurityGroupRDS:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: RaiseTech RDS
+      VpcId:
+        Fn::ImportValue: !Sub ${VPCStack}-VPCID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref EC2SecurityGroupSSH
+          Description: RDS
+      Tags:
+        - Key: Name
+          Value: RaiseTech-cfn-sg-rds
+
+#=============================================
+# ELB
+#=============================================
+  SecurityGroupELB:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: RaiseTech ELB
+      VpcId:
+        Fn::ImportValue: !Sub ${VPCStack}-VPCID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          Description: Application load balancer
+      Tags:
+        - Key: Name
+          Value: RaiseTech-cfn-sg-elb
+
+#=============================================
+# Outputs
+#=============================================
+Outputs:
+  EC2SecurityGroupSSH:
+    Description: EC2SecurityGroupSSH
+    Value: !Ref EC2SecurityGroupSSH
+    Export:
+      Name: !Sub ${AWS::StackName}-EC2SecurityGroupSSH
+
+  EC2SecurityGroupFromELB:
+    Description: EC2SecurityGroupFromELB
+    Value: !Ref EC2SecurityGroupFromELB
+    Export:
+      Name: !Sub ${AWS::StackName}-EC2SecurityGroupFromELB
+
+  SecurityGroupRDS:
+    Description: SecurityGroupRDS
+    Value: !Ref SecurityGroupRDS
+    Export:
+      Name: !Sub ${AWS::StackName}-SecurityGroupRDS
+
+  SecurityGroupELB:
+    Description: SecurityGroupELB
+    Value: !Ref  SecurityGroupELB
+    Export:
+      Name: !Sub ${AWS::StackName}-SecurityGroupELB

@@ -1,0 +1,43 @@
+################## Cloudformation RaiseTech 課題 ###################
+## Author: Daisaku kato
+####################################################################
+AWSTemplateFormatVersion: 2010-09-09
+Description: RaiseTech IAM
+
+Resources:
+#=============================================
+# IAM Role
+#=============================================
+# S3FullAccess
+  IAMRoleForEC2:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument: |
+        {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Service": "ec2.amazonaws.com"
+                    },
+                    "Action": "sts:AssumeRole"
+                }
+            ]
+        }
+      Description: "Allows EC2 instances to call AWS services on your behalf."
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      MaxSessionDuration: 3600
+      Path: /
+      RoleName: IAMRoleForEC2
+
+#=============================================
+# Outputs
+#=============================================
+Outputs:
+  IAMRoleForEC2:
+    Description: IAMRoleForEC2
+    Value: !Ref IAMRoleForEC2
+    Export:
+      Name: !Sub ${AWS::StackName}-for-EC2

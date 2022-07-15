@@ -1,0 +1,148 @@
+################## Cloudformation RaiseTech 課題 ##################
+## Author: Daisaku kato
+###################################################################
+AWSTemplateFormatVersion: 2010-09-09
+Description: RaiseTech VPC
+
+Resources:
+#=============================================
+# VPC
+#=============================================
+  rtVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: RaiseTech-cfn
+
+#=============================================
+# subnet
+#=============================================
+  rtPublicSubnet1a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref rtVPC
+      AvailabilityZone: ap-northeast-1a
+      CidrBlock: 10.0.0.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: RaiseTech-cfn-public-subnet-1a
+
+  rtPublicSubnet1c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref rtVPC
+      AvailabilityZone: ap-northeast-1c
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: RaiseTech-cfn-public-subnet-1c
+
+  rtPrivateSubnet1a:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref rtVPC
+      AvailabilityZone: ap-northeast-1a
+      CidrBlock: 10.0.2.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: RaiseTech-cfn-private-subnet-1a
+
+  rtPrivateSubnet1c:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref rtVPC
+      AvailabilityZone: ap-northeast-1c
+      CidrBlock: 10.0.3.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: RaiseTech-cfn-private-subnet-1c
+
+#=============================================
+# InternetGateway
+#=============================================
+  rtInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: RaiseTech-cfn-igw
+
+  rtAttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref rtInternetGateway
+      VpcId: !Ref rtVPC
+
+#=============================================
+# RouteTable
+#=============================================
+  rtPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref rtVPC
+      Tags:
+        - Key: Name
+          Value: RaiseTech-cfn-public-rt
+
+  rtPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: rtAttachGateway
+    Properties:
+      RouteTableId: !Ref rtPublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref rtInternetGateway
+
+  rtPublicSubnet1aRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref rtPublicRouteTable
+      SubnetId: !Ref rtPublicSubnet1a
+
+  rtPublicSubnet1cRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref rtPublicRouteTable
+      SubnetId: !Ref rtPublicSubnet1c
+
+#=============================================
+# Outputs
+#=============================================
+Outputs:
+  VPCID:
+    Description: VPCID
+    Value: !Ref rtVPC
+    Export:
+      Name: !Sub ${AWS::StackName}-VPCID
+
+  PublicSubnet1a:
+    Description: PublicSubnet1a
+    Value: !Ref rtPublicSubnet1a
+    Export:
+      Name: !Sub ${AWS::StackName}-PublicSubnet1a
+
+  PublicSubnet1c:
+    Description: PublicSubnet1c
+    Value: !Ref rtPublicSubnet1c
+    Export:
+      Name: !Sub ${AWS::StackName}-PublicSubnet1c
+
+  PrivateSubnet1a:
+    Description: PrivateSubnet1a
+    Value: !Ref rtPrivateSubnet1a
+    Export:
+      Name: !Sub ${AWS::StackName}-PrivateSubnet1a
+
+  PrivateSubnet1c:
+    Description: PrivateSubnet1c
+    Value: !Ref rtPrivateSubnet1c
+    Export:
+      Name: !Sub ${AWS::StackName}-PrivateSubnet1c

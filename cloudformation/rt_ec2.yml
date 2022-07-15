@@ -1,0 +1,80 @@
+################## Cloudformation RaiseTech 課題 ###################
+## Author: Daisaku kato
+####################################################################
+AWSTemplateFormatVersion: 2010-09-09
+Description: RaiseTech EC2
+
+Parameters:
+  VPCStack:
+    Type: String
+    Default: RaiseTech-cfn
+
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instance
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: raise-tech
+
+Resources:
+#=============================================
+# EC2
+#=============================================
+# 1a
+  EC2WebServer1a:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-08a8688fb7eacb171
+      InstanceType: t2.micro
+      SubnetId:
+        Fn::ImportValue: !Sub ${VPCStack}-PublicSubnet1a
+      SecurityGroupIds:
+        - Fn::ImportValue: !Sub ${VPCStack}-sg-EC2SecurityGroupSSH
+        - Fn::ImportValue: !Sub ${VPCStack}-sg-EC2SecurityGroupFromELB
+      KeyName: !Ref KeyName
+      IamInstanceProfile: !Ref IAMInstanceProfile
+      Tags:
+        - Key: Name
+          Value: RaiseTech-cfn-1a
+
+# 1c
+  EC2WebServer1c:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-08a8688fb7eacb171
+      InstanceType: t2.micro
+      SubnetId:
+        Fn::ImportValue: !Sub ${VPCStack}-PublicSubnet1c
+      SecurityGroupIds:
+        - Fn::ImportValue: !Sub ${VPCStack}-sg-EC2SecurityGroupSSH
+        - Fn::ImportValue: !Sub ${VPCStack}-sg-EC2SecurityGroupFromELB
+      KeyName: !Ref KeyName
+      IamInstanceProfile: !Ref IAMInstanceProfile
+      Tags:
+        - Key: Name
+          Value: RaiseTech-cfn-1c
+
+#=============================================
+# InstanceProfile
+#=============================================
+  IAMInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: S3FullAccess
+      Path: /
+      Roles:
+        - Fn::ImportValue: !Sub ${VPCStack}-iam-for-EC2
+
+#=============================================
+# Outputs
+#=============================================
+Outputs:
+  EC2WebServer1a:
+    Description: EC2WebServer1a
+    Value: !Ref EC2WebServer1a
+    Export:
+      Name: !Sub ${AWS::StackName}-EC2WebServer1a
+
+  EC2WebServer1c:
+    Description: EC2WebServer1c
+    Value: !Ref EC2WebServer1c
+    Export:
+      Name: !Sub ${AWS::StackName}-EC2WebServer1c
