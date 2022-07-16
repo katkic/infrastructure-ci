@@ -64,6 +64,16 @@ Resources:
         - Fn::ImportValue: !Sub ${VPCStack}-iam-for-EC2
 
 #=============================================
+# ElasticIP
+#=============================================
+  rtEIPAssociation:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      AllocationId:
+        Fn::ImportValue: !Sub ${VPCStack}-eip
+      InstanceId: !Ref EC2WebServer1a
+
+#=============================================
 # Outputs
 #=============================================
 Outputs:

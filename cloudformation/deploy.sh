@@ -9,6 +9,9 @@ aws cloudformation deploy --stack-name "${CFN_STACK_NAME}" \
 aws cloudformation deploy --stack-name "${CFN_STACK_NAME}-sg" \
 --template-file "${FILE_PATH}/rt_sg.yml"
 
+aws cloudformation deploy --stack-name "${CFN_STACK_NAME}-eip" \
+--template-file "${FILE_PATH}/rt_eip.yml"
+
 aws cloudformation deploy --stack-name "${CFN_STACK_NAME}-iam" \
 --template-file "${FILE_PATH}/rt_iam.yml" --capabilities CAPABILITY_NAMED_IAM
 
