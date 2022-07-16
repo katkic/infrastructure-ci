@@ -36,21 +36,21 @@ Resources:
           Value: RaiseTech-cfn-1a
 
 # 1c
-  EC2WebServer1c:
-    Type: AWS::EC2::Instance
-    Properties:
-      ImageId: ami-08a8688fb7eacb171
-      InstanceType: t2.micro
-      SubnetId:
-        Fn::ImportValue: !Sub ${VPCStack}-PublicSubnet1c
-      SecurityGroupIds:
-        - Fn::ImportValue: !Sub ${VPCStack}-sg-EC2SecurityGroupSSH
-        - Fn::ImportValue: !Sub ${VPCStack}-sg-EC2SecurityGroupFromELB
-      KeyName: !Ref KeyName
-      IamInstanceProfile: !Ref IAMInstanceProfile
-      Tags:
-        - Key: Name
-          Value: RaiseTech-cfn-1c
+  # EC2WebServer1c:
+  #   Type: AWS::EC2::Instance
+  #   Properties:
+  #     ImageId: ami-08a8688fb7eacb171
+  #     InstanceType: t2.micro
+  #     SubnetId:
+  #       Fn::ImportValue: !Sub ${VPCStack}-PublicSubnet1c
+  #     SecurityGroupIds:
+  #       - Fn::ImportValue: !Sub ${VPCStack}-sg-EC2SecurityGroupSSH
+  #       - Fn::ImportValue: !Sub ${VPCStack}-sg-EC2SecurityGroupFromELB
+  #     KeyName: !Ref KeyName
+  #     IamInstanceProfile: !Ref IAMInstanceProfile
+  #     Tags:
+  #       - Key: Name
+  #         Value: RaiseTech-cfn-1c
 
 #=============================================
 # InstanceProfile
@@ -73,8 +73,8 @@ Outputs:
     Export:
       Name: !Sub ${AWS::StackName}-EC2WebServer1a
 
-  EC2WebServer1c:
-    Description: EC2WebServer1c
-    Value: !Ref EC2WebServer1c
-    Export:
-      Name: !Sub ${AWS::StackName}-EC2WebServer1c
+  # EC2WebServer1c:
+  #   Description: EC2WebServer1c
+  #   Value: !Ref EC2WebServer1c
+  #   Export:
+  #     Name: !Sub ${AWS::StackName}-EC2WebServer1c
